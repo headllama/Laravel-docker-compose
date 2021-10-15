@@ -1,7 +1,7 @@
 build:
 	docker-compose build app
 
-install:
+start:
 	@make build
 	docker-compose up -d
 	docker-compose exec app composer install
