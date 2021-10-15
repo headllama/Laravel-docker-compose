@@ -1,0 +1,49 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: user
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: devops
+    container_name: devops-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./project/:/var/www
+    networks:
+      - devops-nw
+
+  db:
+    image: mysql:5.7
+    container_name: devops-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./project/docker-compose/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - devops-nw
+
+  nginx:
+    image: nginx:alpine
+    container_name: devops-nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./project/:/var/www
+      - ./project/docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - devops-nw
+
+networks:
+  devops-nw:
+    driver: bridge
